@@ -1,0 +1,391 @@
+#include <iostream>
+#include<tuple>
+#include<fstream>
+
+using namespace std;
+
+class nod {
+    public:
+    int val;
+    nod *stanga,*dreapta;
+};
+
+
+nod *inserare(nod *NodInceput, int valoare)
+{   
+    if (NodInceput == NULL)
+    
+        {
+            nod *NodNou = new nod();
+            NodNou->val = valoare;
+            NodNou->stanga = NULL;
+            NodNou->dreapta = NULL;
+            NodInceput = NodNou;
+          
+        }
+        
+    else
+    
+    {
+    
+        
+    if (NodInceput->val > valoare && NodInceput->stanga!=NULL)
+    
+        {   
+          inserare(NodInceput->stanga, valoare);
+        }
+        
+    else if(NodInceput->val > valoare && NodInceput->stanga==NULL)
+    
+        {
+            nod *NodNou = new nod();
+            NodNou->val = valoare;
+            NodNou->stanga = NULL;
+            NodNou->dreapta = NULL;
+            NodInceput->stanga = NodNou;
+        }
+        
+    if (NodInceput->val < valoare && NodInceput->dreapta!=NULL)
+    
+        {
+           inserare(NodInceput->dreapta, valoare);
+        }
+        
+    else if (NodInceput->val < valoare && NodInceput->dreapta==NULL)
+    
+        {
+             nod *NodNou = new nod();
+            NodNou->val = valoare;
+            NodNou->stanga = NULL;
+            NodNou->dreapta = NULL;
+            NodInceput->dreapta = NodNou;
+        }
+    }
+}
+
+nod *splay(nod *NodInceput, int valoare)
+{
+    if (NodInceput == NULL || NodInceput->val == valoare)
+        return NodInceput;
+        
+    if (NodInceput->val > valoare)
+    
+    {
+        if(NodInceput->stanga == NULL)
+            return NodInceput;
+        if(NodInceput->stanga !=NULL)
+            
+            {
+                if(NodInceput->stanga->val > valoare) //ZIG-ZIG stg
+                
+                {
+                    NodInceput->stanga->stanga = splay(NodInceput->stanga->stanga, valoare);
+                    nod *x = new nod();
+                    x=NodInceput->stanga;
+                    NodInceput->stanga = x->dreapta;
+                    NodInceput->dreapta = x;
+                    NodInceput = x;
+                    
+                }
+                else if (NodInceput->stanga->val < valoare) //ZIG-ZAG
+                
+                {
+                    NodInceput->stanga->dreapta = splay(NodInceput->stanga->dreapta, valoare);
+                    if (NodInceput->stanga->dreapta != NULL)
+                    
+                    {   
+                        nod *x = new nod();
+                        x = (NodInceput->stanga)->dreapta;
+                        (NodInceput->stanga)->dreapta = x->stanga;
+                        x->stanga = NodInceput->stanga;
+                        NodInceput->stanga = x;
+                    }
+                    
+                }
+                
+                if (NodInceput->dreapta == NULL)
+                    return NodInceput;
+                    
+                else
+                
+                {
+                    nod *z = new nod();
+                    z = NodInceput->dreapta;
+                    NodInceput->dreapta = z->stanga;
+                    z->stanga = NodInceput;
+                    return z;
+                }
+            }
+            else
+            {
+                if (NodInceput->dreapta == NULL)
+                    return NodInceput;
+                    
+                if (NodInceput->dreapta->val < valoare)
+                
+                {
+                    NodInceput->dreapta->stanga = splay(NodInceput->dreapta->stanga, valoare);
+                    
+                    if (NodInceput->dreapta->stanga != NULL)
+                    
+                    {
+                        nod *t = new nod();
+                        t = (NodInceput->dreapta)->stanga;
+                        (NodInceput->dreapta)->stanga = t->dreapta;
+                        t->dreapta = NodInceput->dreapta;
+                        NodInceput->dreapta=t;
+                    }
+                    
+                    else if (NodInceput->dreapta->val < valoare)
+                    
+                    {
+                        NodInceput->dreapta->dreapta = splay(NodInceput->dreapta->dreapta, valoare);
+                        nod *t = new nod();
+                        t = NodInceput->dreapta;
+                        NodInceput->dreapta = t->stanga;
+                        t->stanga = NodInceput;
+                        NodInceput=t;
+                    }
+                    
+                    if (NodInceput->dreapta == NULL)
+                        return NodInceput;
+                        
+                    else
+                    
+                    {
+                         nod *w = new nod();
+                        w = NodInceput->dreapta;
+                        NodInceput->dreapta = w->stanga;
+                        w->stanga = NodInceput;
+                        return w;
+                    }
+                        
+                        
+                }
+                
+            }
+            
+        
+    }
+        
+    
+}
+
+int cautare(nod *NodInceput, int valoare)  
+{  
+    nod *o = new nod();
+    o=splay(NodInceput,valoare);
+    if (o->val == valoare)
+    return 1;
+    else
+    return 0;
+}  
+
+nod *stergere(nod *NodInceput, int valoare)
+{
+    if (NodInceput == NULL)
+    
+    {
+        return NodInceput;
+    }
+    
+    else
+    
+    {
+        NodInceput=splay(NodInceput, valoare);
+        
+        if (NodInceput->val != valoare )
+            return NodInceput;
+        else
+            {
+                if(NodInceput->stanga == NULL)
+                {
+                    nod *a = new nod();
+                    a=NodInceput;
+                    NodInceput == NodInceput->dreapta;
+                }
+                
+                else
+                
+                {
+                    nod *a = new nod();
+                    a=NodInceput;
+                    NodInceput=splay(NodInceput->stanga, valoare);
+                    NodInceput->dreapta=a->dreapta;
+                }
+            }
+      
+    }
+    return NodInceput;
+}
+
+int predecesor(nod *NodInceput, int valoare)
+{   
+    nod *x= new nod();
+    x->val = 0;
+    x->stanga = NULL;
+    x->dreapta = NULL;
+    if (NodInceput == NULL)
+        return -1;
+        
+    else
+    {   
+        if (cautare(NodInceput, valoare) == 0)
+            return -1;
+            
+        else
+        
+        {
+            x=NodInceput;
+            x=x->stanga;
+            while(x->dreapta != NULL)
+                x=x->dreapta;
+            return x->val;
+                
+        }
+    }
+    
+}
+
+int succesor(nod *NodInceput, int valoare)
+{   
+    nod *x= new nod();
+    x->val = 0;
+    x->stanga = NULL;
+    x->dreapta = NULL;
+    if (NodInceput == NULL)
+        return -1;
+        
+    else
+    {   
+        if (cautare(NodInceput, valoare) == 0)
+            return -1;
+            
+        else
+        
+        {
+            x=NodInceput;
+            x=x->dreapta;
+            while(x->stanga != NULL)
+                x=x->dreapta;
+            return x->val;
+                
+        }
+    }
+    
+}
+void svd(nod *NodInceput, int i, int j)
+    {
+        if(NodInceput)
+        
+        {
+            svd(NodInceput->stanga, i, j);
+            
+            if (NodInceput->val < j && NodInceput->val > i)
+                cout<<NodInceput->val;
+            
+            svd(NodInceput->dreapta, i, j);
+
+        }
+
+   }
+
+ifstream f("fisier.in");
+
+
+int main()
+{
+    int N,u,d;
+    f>>N;
+    u=N;
+    f>>N;
+    while(N != 1)
+        {
+            if (N == 2 || N==3 || N==4 || N==5)
+            {
+                return -1;
+                f>>N;
+            }
+            else if (N==6)
+            {
+                return -1;
+                f>>N;
+                f>>N;
+                
+            }
+            f>>N;
+        }
+    f>>N;
+    nod *NodInceput = new nod();
+    NodInceput->val=N;
+    NodInceput->stanga=NULL;
+    NodInceput->dreapta=NULL;
+    nod *q=new nod();
+    q->val=N;
+    q->stanga=NULL;
+    q->dreapta=NULL;
+    
+    for (int i=0; i < u; i++)
+        {
+            f>>N;
+            if (N == 1)
+            
+                {
+                    f>>N;
+                    inserare(NodInceput, N);
+                }
+            if (N==2)
+                
+                {   
+                    int r=0,d;
+                    f>>N;
+                    d=cautare(NodInceput, N);
+                    while(d == 1)
+                        {
+                            q=stergere(NodInceput, N);
+                            r ++;
+                        }
+                    cout<<r;
+                }
+            
+            if (N==3)
+            
+            {
+                f>>N;
+                d=cautare(NodInceput,N);
+                cout<<d;
+            }
+            
+            if (N==4)
+            
+            {
+                f>>N;
+                d=succesor(NodInceput,N);
+                cout<<d;
+            }
+            
+            if (N==5)
+            
+            {
+                f>>N;
+                d=predecesor(NodInceput,N);
+                cout<<d;
+            }
+            
+            if (N==6)
+            
+            {   int c,v;
+                f>>N;
+                c=N;
+                f>>N;
+                v=N;
+                svd(NodInceput,c,v);
+                
+            }
+        
+        }
+        
+    
+    f.close();
+    return 0;
+}
